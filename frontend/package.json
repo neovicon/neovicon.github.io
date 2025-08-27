@@ -53,5 +53,5 @@
     "prettier": "^3.1.1",
     "prettier-plugin-tailwindcss": "^0.5.9"
   },
-  "proxy": "http://localhost:5000"
+  "proxy": "https://api.devsandbox.me:5000"
 }
