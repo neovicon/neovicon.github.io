@@ -165,34 +165,38 @@ export const AuthProvider = ({ children }) => {
 
   // Load user from token
   const loadUser = async () => {
-    try {
-      dispatch({ type: AUTH_ACTIONS.SET_LOADING, payload: true });
+  try {
+    dispatch({ type: AUTH_ACTIONS.SET_LOADING, payload: true });
 
-      const token = localStorage.getItem('token');
-      if (!token) {
-        dispatch({ type: AUTH_ACTIONS.SET_LOADING, payload: false });
-        return;
-      }
-
-      // Verify token and get user data
-      const response = await api.get('/auth/me', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-
-      dispatch({
-        type: AUTH_ACTIONS.AUTH_SUCCESS,
-        payload: {
-          user: response.data.data.user,
-          token: token
-        }
-      });
-
-    } catch (error) {
-      console.error('Load user error:', error);
-      localStorage.removeItem('token');
-      dispatch({ type: AUTH_ACTIONS.AUTH_FAILURE, payload: 'Session expired' });
+    const token = localStorage.getItem('token');
+    if (!token) {
+      dispatch({ type: AUTH_ACTIONS.SET_LOADING, payload: false });
+      return;
     }
-  };
+
+    const response = await api.get('/auth/me', {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Cache-Control': 'no-cache'
+      }
+    });
+
+    console.log("AUTH /me raw response:", response);
+    console.log("AUTH /me response.data:", response.data);
+    const user = response.data?.data?.user;
+    if (!user) throw new Error("User missing in response");
+
+    dispatch({
+      type: AUTH_ACTIONS.AUTH_SUCCESS,
+      payload: { user, token }
+    });
+
+  } catch (error) {
+    console.error('Load user error:', error);
+    localStorage.removeItem('token');
+    dispatch({ type: AUTH_ACTIONS.AUTH_FAILURE, payload: 'Session expired' });
+  }
+};
 
   // Register function
   const register = async (userData) => {

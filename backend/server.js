@@ -80,6 +80,20 @@ if (process.env.NODE_ENV === 'development') {
 // Serve static files
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
+// serve frontend build
+app.use(express.static(path.join(__dirname, '../frontend/dist')));
+
+// for production, serve frontend build
+app.get('*', (req, res, next) => {
+  if (req.path.startsWith('/api')) {
+    return next(); // let API routes handle it
+  }
+
+  res.sendFile(path.join(__dirname, '../frontend/dist/index.html'));
+});
+
+
+
 // Database connection
 mongoose.connect(process.env.MONGODB_URI)
   .then(() => {
